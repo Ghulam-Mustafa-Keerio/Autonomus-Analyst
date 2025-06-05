@@ -34,15 +34,15 @@ const InitialAnalysisOutputSchema = z.object({
       value: z.string().describe("Calculated value of the metric."),
       insight: z.string().optional().describe("Brief insight or context for the metric."),
     })).describe("Key metrics derived from the data, suitable for a dashboard overview. Calculate at least 3-4 diverse metrics. Ensure values are calculated correctly from the data."),
-    suggestedVisualizations: z.array(z.object({
-      title: z.string().describe("A descriptive title for the suggested visualization (e.g., 'Sales per Product')."),
-      type: z.enum(['bar', 'line', 'pie', 'scatter', 'table']).describe("The type of chart or visualization suggested. Choose the most appropriate type for the data relationship from 'bar', 'line', 'pie', 'scatter', 'table'."),
-      description: z.string().describe("A brief explanation of what this visualization would show (e.g., 'This bar chart shows total sales for each product.') and why it's useful."),
+    suggestedVisualizations: z.array(z.object({  
+      title: z.string().describe("A descriptive title for the suggested visualization, focusing on business relevance and clarity (e.g., 'Revenue Trend Analysis', 'Customer Distribution')."),  
+      type: z.enum(['bar', 'line', 'area', 'pie', 'scatter', 'bubble', 'heatmap', 'treemap', 'candlestick', 'gauge', 'funnel', 'radar', 'boxplot', 'violin', 'waterfall', 'sunburst', 'chord', 'sankey', 'density', 'wordcloud', 'table', 'other']).describe("The type of chart or visualization suggested. Choose the most appropriate type from a wide range including 'bar', 'line', 'area', 'pie', 'scatter', 'bubble', 'heatmap', 'treemap', etc., suitable for clear, colourful displays."),  
+      description: z.string().describe("A brief, business-oriented explanation of what this colorful visualization would show (e.g., 'This vibrant bar chart highlights total sales per product category, making it easy to compare performance at a glance.') and why it's useful for quick insights. Mention the potential for an optional interactive area for user prompts to explore variations."),  
       columns: z.array(z.string()).describe("The names of the CSV columns that are directly relevant for creating this visualization (e.g., ['Product', 'Sales'] for sales per product)."),
       data: z.array(ChartDataItemSchema).optional().describe("Optional: If suggesting a 'bar' or 'line' chart, provide data as an array of {name, value} objects suitable for direct rendering. 'name' should be the x-axis category, and 'value' the y-axis numerical value. Only provide this if confident in the structure and the data is simple enough."),
-    })).describe("Suggest 2-3 diverse visualizations appropriate for the data. For each, specify title, type, description, and relevant columns. For 'bar' or 'line' charts, attempt to provide structured data for rendering if feasible."),
+    })).describe("Suggest 2-3 diverse and meaningful visualizations appropriate for presenting key business insights from the data. Emphasize colorful displays suitable for a business perspective and mention an optional interactive area for user prompts. For each, specify title, type, description, and relevant columns. For simple chart types like 'bar' or 'line', attempt to provide structured data for rendering if feasible."),  
     suggestedMlModels: z.array(z.object({
-        modelName: z.string().describe("Name of the suggested machine learning model (e.g., 'Linear Regression', 'Random Forest Classifier', 'K-Means Clustering')."),
+        modelName: z.string().describe("Name of the suggested machine learning model (e.g., 'Linear Regression', 'Random Forest Classifier', 'K-Means Clustering', 'LSTM for Time Series', 'DBSCAN', 'XGBoost')."),  
         modelType: z.enum(['regression', 'classification', 'clustering', 'forecasting', 'anomaly_detection', 'other']).describe("The general type of ML model suggested."),
         rationale: z.string().describe("Brief explanation why this model might be suitable for the data or the insights found."),
         potentialTargetVariable: z.string().optional().describe("If applicable (e.g., for regression/classification), suggest a potential target variable from the dataset columns."),
@@ -65,14 +65,14 @@ const initialAnalysisPrompt = ai.definePrompt({
 1.  Summarize key insights from the data.
 2.  Identify potential areas of interest for deeper investigation.
 3.  Extract key performance indicators (KPIs) or metrics that would be suitable for a dashboard. Provide at least 3-4 diverse metrics, including their name, calculated value, and a brief insight if applicable. Ensure values are calculated correctly from the data.
-4.  Suggest 2-3 diverse and meaningful visualizations (e.g., bar chart, line graph, pie chart, scatter plot, or a summary table). For each suggestion, provide:
-    a.  A clear title (e.g., "Total Sales by Region", "Sales Trend Over Time").
-    b.  The type of visualization (choose from 'bar', 'line', 'pie', 'scatter', 'table').
-    c.  A concise description of what the visualization would show and its purpose.
+4.  Suggest 2-3 diverse and meaningful visualizations appropriate for presenting key business insights from the data. Emphasize colorful displays suitable for a business perspective and mention an optional interactive area for user prompts to explore variations. For each suggestion, provide:
+    a.  A clear title focusing on business relevance and clarity (e.g., "Total Sales by Region", "Sales Trend Over Time").
+    b.  The type of visualization (choose the most appropriate type from a wide range like 'bar', 'line', 'area', 'pie', 'scatter', 'bubble', 'heatmap', 'treemap', 'table', etc.).
+    c.  A concise, business-oriented description of what this colorful visualization would show and its purpose, mentioning the potential for an optional interactive area for user prompts.
     d.  The specific column names from the CSV that would be used to create this visualization.
     e.  IMPORTANT: If suggesting a 'bar' or 'line' chart AND the data is simple enough (e.g., 1 categorical column and 1 numerical column for a bar chart, or a time-like column and a numerical column for a line chart), attempt to provide a 'data' field as an array of objects, where each object has a 'name' (string, for x-axis category/label like product name or date) and a 'value' (number, for y-axis numerical value like sales amount or count). For example, for a bar chart: [{"name": "CategoryA", "value": 120}, {"name": "CategoryB", "value": 200}]. Only include this 'data' field if you can confidently structure it from the CSV for these specific chart types.
 5.  Suggest 1-2 machine learning models that could be applied to this dataset based on its structure and potential insights. For each, provide:
-    a.  The name of the model (e.g., "Linear Regression", "Random Forest Classifier", "K-Means Clustering").
+    a.  The name of the model (e.g., "Linear Regression", "Random Forest Classifier", "K-Means Clustering", "LSTM for Time Series", "XGBoost").
     b.  The general type of model (choose from 'regression', 'classification', 'clustering', 'forecasting', 'anomaly_detection', 'other').
     c.  A brief rationale explaining why this model might be suitable.
     d.  If applicable (e.g., for regression or classification tasks), suggest a potential target variable from the dataset columns.
