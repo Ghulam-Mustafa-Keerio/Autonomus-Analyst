@@ -16,6 +16,13 @@ const FullDataAnalysisInputSchema = z.object({
 });
 export type FullDataAnalysisInput = z.infer<typeof FullDataAnalysisInputSchema>;
 
+// Schema for individual data items within a chart's data array
+const ChartDataItemSchema = z.object({
+    name: z.string().describe("The category name for the x-axis or label (e.g., product name, date)."),
+    value: z.number().describe("The numerical value for the y-axis (e.g., sales amount, count).")
+}).describe("A single data point for a chart, typically consisting of a name (category/x-axis) and a value (y-axis).");
+
+
 // Schema for the initial analysis part
 const InitialAnalysisOutputSchema = z.object({
     summary: z.string().describe('A summary of the key insights from the data file.'),
@@ -32,7 +39,7 @@ const InitialAnalysisOutputSchema = z.object({
       type: z.enum(['bar', 'line', 'pie', 'scatter', 'table']).describe("The type of chart or visualization suggested. Choose the most appropriate type for the data relationship from 'bar', 'line', 'pie', 'scatter', 'table'."),
       description: z.string().describe("A brief explanation of what this visualization would show (e.g., 'This bar chart shows total sales for each product.') and why it's useful."),
       columns: z.array(z.string()).describe("The names of the CSV columns that are directly relevant for creating this visualization (e.g., ['Product', 'Sales'] for sales per product)."),
-      data: z.array(z.any()).optional().describe("Optional: If suggesting a 'bar' or 'line' chart, provide data in a format suitable for direct rendering, e.g., [{name: 'CategoryA', value: 100}, {name: 'CategoryB', value: 150}]. 'name' should be the x-axis category, and 'value' the y-axis numerical value. For line charts, 'name' could be a date/time string if appropriate. Only provide this if confident in the structure."),
+      data: z.array(ChartDataItemSchema).optional().describe("Optional: If suggesting a 'bar' or 'line' chart, provide data as an array of {name, value} objects suitable for direct rendering. 'name' should be the x-axis category, and 'value' the y-axis numerical value. Only provide this if confident in the structure and the data is simple enough."),
     })).describe("Suggest 2-3 diverse visualizations appropriate for the data. For each, specify title, type, description, and relevant columns. For 'bar' or 'line' charts, attempt to provide structured data for rendering if feasible."),
     suggestedMlModels: z.array(z.object({
         modelName: z.string().describe("Name of the suggested machine learning model (e.g., 'Linear Regression', 'Random Forest Classifier', 'K-Means Clustering')."),
@@ -63,7 +70,7 @@ const initialAnalysisPrompt = ai.definePrompt({
     b.  The type of visualization (choose from 'bar', 'line', 'pie', 'scatter', 'table').
     c.  A concise description of what the visualization would show and its purpose.
     d.  The specific column names from the CSV that would be used to create this visualization.
-    e.  IMPORTANT: If suggesting a 'bar' or 'line' chart AND the data is simple enough (e.g., 1 categorical column and 1 numerical column for a bar chart, or a time-like column and a numerical column for a line chart), attempt to provide a 'data' field as an array of objects suitable for direct charting. For example, for a bar chart: [{"name": "CategoryA", "value": 120}, {"name": "CategoryB", "value": 200}]. 'name' is the x-axis, 'value' is the y-axis. For a line chart, 'name' can be a date/time string or a sequential category. Only include this 'data' field if you can confidently structure it from the CSV for these specific chart types.
+    e.  IMPORTANT: If suggesting a 'bar' or 'line' chart AND the data is simple enough (e.g., 1 categorical column and 1 numerical column for a bar chart, or a time-like column and a numerical column for a line chart), attempt to provide a 'data' field as an array of objects, where each object has a 'name' (string, for x-axis category/label like product name or date) and a 'value' (number, for y-axis numerical value like sales amount or count). For example, for a bar chart: [{"name": "CategoryA", "value": 120}, {"name": "CategoryB", "value": 200}]. Only include this 'data' field if you can confidently structure it from the CSV for these specific chart types.
 5.  Suggest 1-2 machine learning models that could be applied to this dataset based on its structure and potential insights. For each, provide:
     a.  The name of the model (e.g., "Linear Regression", "Random Forest Classifier", "K-Means Clustering").
     b.  The general type of model (choose from 'regression', 'classification', 'clustering', 'forecasting', 'anomaly_detection', 'other').
