@@ -3,7 +3,7 @@
 /**
  * @fileOverview This file defines a Genkit flow for analyzing data files and providing AI-powered summaries.
  *
- * - analyzeData - A function that takes a data file as input and returns an AI-powered analysis.
+ * - analyzeData - A function that takes CSV data as a string and returns an AI-powered analysis.
  * - AnalyzeDataInput - The input type for the analyzeData function.
  * - AnalyzeDataOutput - The return type for the analyzeData function.
  */
@@ -12,11 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const AnalyzeDataInputSchema = z.object({
-  dataUri: z
-    .string()
-    .describe(
-      'The data file as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.'
-    ),
+  csvData: z.string().describe('The CSV data content as a string.'),
 });
 export type AnalyzeDataInput = z.infer<typeof AnalyzeDataInputSchema>;
 
@@ -36,7 +32,12 @@ const prompt = ai.definePrompt({
   name: 'analyzeDataPrompt',
   input: {schema: AnalyzeDataInputSchema},
   output: {schema: AnalyzeDataOutputSchema},
-  prompt: `You are an expert data analyst. You will analyze the data file provided and summarize key insights and potential areas of interest for deeper investigation.\n\nData File: {{media url=dataUri}}`,
+  prompt: `You are an expert data analyst. You will analyze the data provided and summarize key insights and potential areas of interest for deeper investigation.
+
+Data Content:
+\`\`\`csv
+{{{csvData}}}
+\`\`\``,
 });
 
 const analyzeDataFlow = ai.defineFlow(

@@ -8,17 +8,14 @@ import { useToast } from '@/hooks/use-toast';
 import { SectionWrapper } from '@/components/common/SectionWrapper';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-// Sample CSV data:
-// Date,Product,Sales,Region
-// 2024-01-01,A,100,North
-// 2024-01-02,B,150,North
-// 2024-01-03,A,120,South
-// 2024-01-04,C,200,East
-// 2024-01-05,B,130,West
-// 2024-01-06,A,110,North
-// 2024-01-07,C,220,South
-const sampleCsvBase64 = "RGF0ZSxQcm9kdWN0LFNhbGVzLFJlZ2lvbgoyMDI0LTAxLTAxLEEsMTAwLE5vcnRoCjIwMjQtMDEtMDIsQiwxNTAsTm9ydGgKMjAyNC0wMS0wMyxBLDEyMCxTb3V0aAoyMDI0LTAxLTA0LEMsyAwMCxFYXN0CjIwMjQtMDEtMDUsQiwxMzAsV2VzdAoyMDI0LTAxLTA2LEEsMTEwLE5vcnRoCjIwMjQtMDEtMDcsQywyMjAsU291dGg=";
-const sampleDataUri = `data:text/csv;base64,${sampleCsvBase64}`;
+const sampleCsvString = `Date,Product,Sales,Region
+2024-01-01,A,100,North
+2024-01-02,B,150,North
+2024-01-03,A,120,South
+2024-01-04,C,200,East
+2024-01-05,B,130,West
+2024-01-06,A,110,North
+2024-01-07,C,220,South`;
 
 export function AiAnalysisSection() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeDataOutput | null>(null);
@@ -31,7 +28,7 @@ export function AiAnalysisSection() {
     setAnalysisResult(null);
     startTransition(async () => {
       try {
-        const result = await analyzeData({ dataUri: sampleDataUri });
+        const result = await analyzeData({ csvData: sampleCsvString });
         setAnalysisResult(result);
         toast({
           title: "Analysis Complete",
