@@ -1,6 +1,7 @@
+
 'use server';
 /**
- * @fileOverview Orchestrates a full data analysis, including insights, metrics, visualization suggestions, and a report.
+ * @fileOverview Orchestrates a full data analysis, including insights, metrics, visualization suggestions, ML model suggestions, and a report.
  * - getFullDataAnalysis - Main function to call.
  * - FullDataAnalysisInput - Input type for this flow.
  * - FullDataAnalysisOutput - Output type for this flow.
@@ -15,7 +16,7 @@ const FullDataAnalysisInputSchema = z.object({
 });
 export type FullDataAnalysisInput = z.infer<typeof FullDataAnalysisInputSchema>;
 
-// Schema for the initial analysis part (metrics, viz suggestions, summary, PoI)
+// Schema for the initial analysis part
 const InitialAnalysisOutputSchema = z.object({
     summary: z.string().describe('A summary of the key insights from the data file.'),
     potentialAreasOfInterest: z
@@ -31,7 +32,14 @@ const InitialAnalysisOutputSchema = z.object({
       type: z.enum(['bar', 'line', 'pie', 'scatter', 'table']).describe("The type of chart or visualization suggested. Choose the most appropriate type for the data relationship from 'bar', 'line', 'pie', 'scatter', 'table'."),
       description: z.string().describe("A brief explanation of what this visualization would show (e.g., 'This bar chart shows total sales for each product.') and why it's useful."),
       columns: z.array(z.string()).describe("The names of the CSV columns that are directly relevant for creating this visualization (e.g., ['Product', 'Sales'] for sales per product)."),
-    })).describe("Suggest 2-3 diverse visualizations appropriate for the data. For each, specify title, type, description, and relevant columns."),
+      data: z.array(z.any()).optional().describe("Optional: If suggesting a 'bar' or 'line' chart, provide data in a format suitable for direct rendering, e.g., [{name: 'CategoryA', value: 100}, {name: 'CategoryB', value: 150}]. 'name' should be the x-axis category, and 'value' the y-axis numerical value. For line charts, 'name' could be a date/time string if appropriate. Only provide this if confident in the structure."),
+    })).describe("Suggest 2-3 diverse visualizations appropriate for the data. For each, specify title, type, description, and relevant columns. For 'bar' or 'line' charts, attempt to provide structured data for rendering if feasible."),
+    suggestedMlModels: z.array(z.object({
+        modelName: z.string().describe("Name of the suggested machine learning model (e.g., 'Linear Regression', 'Random Forest Classifier', 'K-Means Clustering')."),
+        modelType: z.enum(['regression', 'classification', 'clustering', 'forecasting', 'anomaly_detection', 'other']).describe("The general type of ML model suggested."),
+        rationale: z.string().describe("Brief explanation why this model might be suitable for the data or the insights found."),
+        potentialTargetVariable: z.string().optional().describe("If applicable (e.g., for regression/classification), suggest a potential target variable from the dataset columns."),
+    })).describe("Suggest 1-2 machine learning models that could be applied to this dataset based on its structure and potential insights. For each, provide name, type, rationale, and if relevant, a potential target variable."),
 });
 
 
@@ -55,6 +63,12 @@ const initialAnalysisPrompt = ai.definePrompt({
     b.  The type of visualization (choose from 'bar', 'line', 'pie', 'scatter', 'table').
     c.  A concise description of what the visualization would show and its purpose.
     d.  The specific column names from the CSV that would be used to create this visualization.
+    e.  IMPORTANT: If suggesting a 'bar' or 'line' chart AND the data is simple enough (e.g., 1 categorical column and 1 numerical column for a bar chart, or a time-like column and a numerical column for a line chart), attempt to provide a 'data' field as an array of objects suitable for direct charting. For example, for a bar chart: [{"name": "CategoryA", "value": 120}, {"name": "CategoryB", "value": 200}]. 'name' is the x-axis, 'value' is the y-axis. For a line chart, 'name' can be a date/time string or a sequential category. Only include this 'data' field if you can confidently structure it from the CSV for these specific chart types.
+5.  Suggest 1-2 machine learning models that could be applied to this dataset based on its structure and potential insights. For each, provide:
+    a.  The name of the model (e.g., "Linear Regression", "Random Forest Classifier", "K-Means Clustering").
+    b.  The general type of model (choose from 'regression', 'classification', 'clustering', 'forecasting', 'anomaly_detection', 'other').
+    c.  A brief rationale explaining why this model might be suitable.
+    d.  If applicable (e.g., for regression or classification tasks), suggest a potential target variable from the dataset columns.
 
 Data Content:
 \`\`\`csv
@@ -75,7 +89,7 @@ const getFullDataAnalysisFlow = ai.defineFlow(
     outputSchema: FullDataAnalysisOutputSchema,
   },
   async (input) => {
-    // Step 1: Get initial analysis (summary, interests, metrics, viz suggestions)
+    // Step 1: Get initial analysis (summary, interests, metrics, viz suggestions, ml suggestions)
     const { output: initialAnalysis } = await initialAnalysisPrompt(input);
     if (!initialAnalysis) {
         throw new Error('Initial analysis failed to produce output.');
@@ -95,3 +109,4 @@ const getFullDataAnalysisFlow = ai.defineFlow(
     };
   }
 );
+
