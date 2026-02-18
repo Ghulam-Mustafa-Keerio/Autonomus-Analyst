@@ -70,10 +70,6 @@ firestore-debug.log
 logs/
 *.log
 
-# OS
-.DS_Store
-Thumbs.db
-
 # temporary files
 tmp/
 temp/
