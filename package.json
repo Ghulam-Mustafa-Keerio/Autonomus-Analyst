@@ -1,6 +1,30 @@
 {
-  "name": "nextn",
-  "version": "0.1.0",
+  "name": "autonomous-analyst",
+  "version": "1.0.0",
+  "description": "AI-powered industry analytics platform with Firebase - Intelligent data analysis, automated visualizations, and comprehensive reporting",
+  "author": "Ghulam Mustafa Keerio",
+  "license": "MIT",
+  "keywords": [
+    "analytics",
+    "firebase",
+    "typescript",
+    "data-analysis",
+    "automation",
+    "business-intelligence",
+    "data-visualization",
+    "ai-powered",
+    "report-generation",
+    "nextjs",
+    "cloud-computing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ghulam-Mustafa-Keerio/Autonomus-Analyst.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ghulam-Mustafa-Keerio/Autonomus-Analyst/issues"
+  },
+  "homepage": "https://github.com/Ghulam-Mustafa-Keerio/Autonomus-Analyst#readme",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
