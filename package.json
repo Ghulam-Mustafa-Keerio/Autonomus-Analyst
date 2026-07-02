@@ -1,7 +1,7 @@
 {
   "name": "autonomous-analyst",
   "version": "1.0.0",
-  "description": "AI-powered industry analytics platform with Firebase - Intelligent data analysis, automated visualizations, and comprehensive reporting",
+  "description": "AI-powered automated data analysis platform with Firebase",
   "author": "Ghulam Mustafa Keerio",
   "license": "MIT",
   "keywords": [
@@ -33,7 +33,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "type-check": "tsc --noEmit",
+    "test": "jest"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.8.0",
